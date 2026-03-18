@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import Any
 
 from sqlalchemy import (
@@ -13,6 +14,8 @@ from sqlalchemy import (
     UUID,
     DateTime,
     func,
+    select,
+    update,
 )
 from sqlalchemy.ext.asyncio import AsyncConnection, create_async_engine
 
@@ -26,8 +29,16 @@ engine = create_async_engine(
     pool_size=settings.DATABASE_POOL_SIZE,
     pool_recycle=settings.DATABASE_POOL_TTL,
     pool_pre_ping=settings.DATABASE_POOL_PRE_PING,
+    echo=settings.ENVIRONMENT.is_debug,
 )
 metadata = MetaData(naming_convention=DB_NAMING_CONVENTION)
+
+
+def _apply_soft_delete_filter(query: Select | Insert | Update) -> Select | Insert | Update:
+    for from_clause in query.froms:
+        if isinstance(from_clause, Table) and "deleted_at" in from_clause.c:
+            query = query.where(from_clause.c.deleted_at.is_(None))
+    return query
 
 
 async def fetch_one(
@@ -35,6 +46,8 @@ async def fetch_one(
     connection: AsyncConnection | None = None,
     commit_after: bool = False,
 ) -> dict[str, Any] | None:
+    select_query = _apply_soft_delete_filter(select_query)
+
     if not connection:
         async with engine.connect() as connection:
             cursor = await _execute_query(select_query, connection, commit_after)
@@ -49,6 +62,8 @@ async def fetch_all(
     connection: AsyncConnection | None = None,
     commit_after: bool = False,
 ) -> list[dict[str, Any]]:
+    select_query = _apply_soft_delete_filter(select_query)
+
     if not connection:
         async with engine.connect() as connection:
             cursor = await _execute_query(select_query, connection, commit_after)
@@ -89,6 +104,7 @@ async def get_db_connection() -> AsyncConnection:
         yield connection
     finally:
         await connection.close()
+
 
 transaction = Table(
     "transactions",
