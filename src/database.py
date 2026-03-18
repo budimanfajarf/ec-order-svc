@@ -1,21 +1,18 @@
-from datetime import datetime, timezone
 from typing import Any
 
 from sqlalchemy import (
+    UUID,
+    Column,
     CursorResult,
+    DateTime,
+    Identity,
     Insert,
+    Integer,
     MetaData,
     Select,
-    Update,
     Table,
-    Column,
-    Identity,
-    Integer,
-    UUID,
-    DateTime,
+    Update,
     func,
-    select,
-    update,
 )
 from sqlalchemy.ext.asyncio import AsyncConnection, create_async_engine
 
@@ -34,7 +31,9 @@ engine = create_async_engine(
 metadata = MetaData(naming_convention=DB_NAMING_CONVENTION)
 
 
-def _apply_soft_delete_filter(query: Select | Insert | Update) -> Select | Insert | Update:
+def _apply_soft_delete_filter(
+    query: Select | Insert | Update,
+) -> Select | Insert | Update:
     for from_clause in query.froms:
         if isinstance(from_clause, Table) and "deleted_at" in from_clause.c:
             query = query.where(from_clause.c.deleted_at.is_(None))
@@ -114,6 +113,12 @@ transaction = Table(
     Column("user_id", Integer),
     Column("amount", Integer),
     Column("created_at", DateTime, server_default=func.now(), nullable=False),
-    Column("updated_at", DateTime, server_default=func.now(), onupdate=func.now(), nullable=False),
+    Column(
+        "updated_at",
+        DateTime,
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    ),
     Column("deleted_at", DateTime, nullable=True),
 )

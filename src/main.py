@@ -38,4 +38,5 @@ if settings.ENVIRONMENT.is_deployed:
 async def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
 
+
 app.include_router(transactions_router, prefix="/transactions", tags=["Transaction"])
