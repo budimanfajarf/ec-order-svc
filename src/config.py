@@ -39,7 +39,13 @@ class Config(CustomBaseSettings):
 
 settings = Config()
 
-app_configs: dict[str, Any] = {"title": "App API"}
+app_configs: dict[str, Any] = {
+    "title": "Order API",
+    "description": "API for managing orders in the e-commerce system",
+    "docs_url": "/docs",
+    "redoc_url": "/redoc",
+}
+
 if settings.ENVIRONMENT.is_deployed:
     app_configs["root_path"] = f"/v{settings.APP_VERSION}"
 
