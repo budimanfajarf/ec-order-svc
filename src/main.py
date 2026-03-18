@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from src.config import app_configs, settings
+from src.transactions.router import router as transactions_router
 
 
 @asynccontextmanager
@@ -37,6 +38,4 @@ if settings.ENVIRONMENT.is_deployed:
 async def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
 
-@app.get("/test", include_in_schema=True)
-async def test() -> dict[str, str]:
-    return {"message": "This is a test endpoint"}
+app.include_router(transactions_router, prefix="/transactions", tags=["Transaction"])

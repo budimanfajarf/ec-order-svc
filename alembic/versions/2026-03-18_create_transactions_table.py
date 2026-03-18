@@ -23,7 +23,7 @@ def upgrade() -> None:
     op.create_table(
         "transactions",
         sa.Column("id", sa.Integer(), sa.Identity(always=False), nullable=False),
-        sa.Column("uuid", postgresql.UUID(), nullable=False),
+        sa.Column("uuid", postgresql.UUID(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=False),
         sa.Column("amount", sa.Integer(), nullable=False),
         sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),

@@ -6,6 +6,13 @@ from sqlalchemy import (
     MetaData,
     Select,
     Update,
+    Table,
+    Column,
+    Identity,
+    Integer,
+    UUID,
+    DateTime,
+    func,
 )
 from sqlalchemy.ext.asyncio import AsyncConnection, create_async_engine
 
@@ -82,3 +89,15 @@ async def get_db_connection() -> AsyncConnection:
         yield connection
     finally:
         await connection.close()
+
+transaction = Table(
+    "transactions",
+    metadata,
+    Column("id", Integer, Identity(), primary_key=True),
+    Column("uuid", UUID),
+    Column("user_id", Integer),
+    Column("amount", Integer),
+    Column("created_at", DateTime, server_default=func.now(), nullable=False),
+    Column("updated_at", DateTime, server_default=func.now(), onupdate=func.now(), nullable=False),
+    Column("deleted_at", DateTime, nullable=True),
+)
