@@ -2,8 +2,8 @@ from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Response, status
 
-from src.transactions import TransactionResponse, TransactionsResponse
 from src.transactions import service
+from src.transactions.schemas import TransactionResponse, TransactionsResponse
 
 router = APIRouter()
 
