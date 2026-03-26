@@ -1,6 +1,7 @@
+from fastapi import APIRouter, Depends
 
-from fastapi import APIRouter
-
+from src.auth.jwt import parse_jwt_user_data
+from src.auth.schemas import JWTData
 from src.transactions import service
 from src.transactions.schemas import TransactionResponse, TransactionsResponse
 
@@ -9,9 +10,9 @@ router = APIRouter()
 
 @router.get("", response_model=TransactionsResponse, include_in_schema=True)
 async def get_transactions(
-    user_id: int = 1,  # TODO: get user_id from jwt
+    jwt_data: JWTData = Depends(parse_jwt_user_data),
 ) -> TransactionsResponse:
-    transactions = await service.get_transactions_by_user_id(user_id)
+    transactions = await service.get_transactions_by_user_id(jwt_data.user_id)
 
     return TransactionsResponse(
         data=[

@@ -27,6 +27,9 @@ class Config(CustomBaseSettings):
     CORS_ORIGINS_REGEX: str | None = None
     CORS_HEADERS: list[str] = ["*"]
 
+    JWT_ALG: str
+    JWT_SECRET: str
+
     APP_VERSION: str = "0.1"
 
     @model_validator(mode="after")
