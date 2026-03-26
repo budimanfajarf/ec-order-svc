@@ -1,24 +1,24 @@
+from fastapi import Depends
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 
-from fastapi import Depends
-from fastapi.security import OAuth2PasswordBearer
-
-from src.config import settings
 from src.auth.exceptions import AuthRequired, InvalidToken
 from src.auth.schemas import JWTData
+from src.config import settings
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+http_bearer = HTTPBearer(auto_error=False)
+
 
 async def parse_jwt_user_data_optional(
-    token: str = Depends(oauth2_scheme),
+    bearer: HTTPAuthorizationCredentials | None = Depends(http_bearer),
 ) -> JWTData | None:
-    if not token:
+    if not bearer:
         return None
 
+    token = bearer.credentials
+
     try:
-        payload = jwt.decode(
-            token, settings.JWT_SECRET, algorithms=[settings.JWT_ALG]
-        )
+        payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALG])
     except JWTError:
         raise InvalidToken()
 
@@ -26,9 +26,9 @@ async def parse_jwt_user_data_optional(
 
 
 async def parse_jwt_user_data(
-    token: JWTData | None = Depends(parse_jwt_user_data_optional),
+    jwt_data: JWTData | None = Depends(parse_jwt_user_data_optional),
 ) -> JWTData:
-    if not token:
+    if not jwt_data:
         raise AuthRequired()
 
-    return token
+    return jwt_data
