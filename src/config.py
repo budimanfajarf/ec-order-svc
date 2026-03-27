@@ -32,6 +32,8 @@ class Config(CustomBaseSettings):
 
     APP_VERSION: str = "0.1"
 
+    CATALOG_SVC_URL: str = "localhost:50051"
+
     @model_validator(mode="after")
     def validate_sentry_non_local(self) -> "Config":
         if self.ENVIRONMENT.is_deployed and not self.SENTRY_DSN:

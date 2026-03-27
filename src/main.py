@@ -5,6 +5,7 @@ import sentry_sdk
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
+from src.catalog_svc.client import catalog_client
 from src.config import app_configs, settings
 from src.transactions.router import router as transactions_router
 
@@ -12,8 +13,10 @@ from src.transactions.router import router as transactions_router
 @asynccontextmanager
 async def lifespan(_application: FastAPI) -> AsyncGenerator:
     # Startup
+    await catalog_client.connect()
     yield
     # Shutdown
+    await catalog_client.close()
 
 
 app = FastAPI(**app_configs, lifespan=lifespan)

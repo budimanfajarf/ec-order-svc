@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package catalog_svc;
+
+service CatalogService {
+  rpc GetStoreByUuid(GetStoreByUuidRequest) returns (GetStoreByUuidResponse);
+  rpc GetProductsByUuids(GetProductsByUuidsRequest) returns (GetProductsByUuidsResponse);
+  rpc ReserveStocks(ReserveStocksRequest) returns (ReserveStocksResponse);
+}
+
+// ── Store ──────────────────────────────────────────────────────────────────
+
+message GetStoreByUuidRequest {
+  string store_uuid = 1;
+}
+
+message Store {
+  string uuid = 1;
+  string name = 2;
+}
+
+message GetStoreByUuidResponse {
+  Store store = 1;  // not set if store not found
+}
+
+// ── Products ───────────────────────────────────────────────────────────────
+
+message GetProductsByUuidsRequest {
+  string store_uuid = 1;
+  repeated string product_uuids = 2;
+}
+
+message Product {
+  string uuid = 1;
+  string name = 2;
+  int64 price = 3;  // IDR, no decimals
+}
+
+message GetProductsByUuidsResponse {
+  // Only returns products that exist AND belong to the given store
+  repeated Product products = 1;
+}
+
+// ── Stock Reservation ──────────────────────────────────────────────────────
+
+message StockItem {
+  string product_uuid = 1;
+  int32 quantity = 2;
+}
+
+message ReserveStocksRequest {
+  repeated StockItem items = 1;
+}
+
+message ReserveStocksResponse {
+  bool success = 1;
+  string message = 2;  // error detail if success is false
+}
