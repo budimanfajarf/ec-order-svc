@@ -3,7 +3,12 @@ from fastapi import APIRouter, Depends
 from src.auth.jwt import parse_jwt_user_data
 from src.auth.schemas import JWTData
 from src.transactions import service
-from src.transactions.schemas import TransactionResponse, TransactionsResponse
+from src.transactions.dependencies import valid_transaction
+from src.transactions.schemas import (
+    TransactionRequest,
+    TransactionResponse,
+    TransactionsResponse,
+)
 
 router = APIRouter()
 
@@ -25,3 +30,11 @@ async def get_transactions(
             for transaction in transactions
         ]
     )
+
+
+@router.post("", response_model=TransactionRequest, include_in_schema=True)
+async def create_transaction(
+    jwt_data: JWTData = Depends(parse_jwt_user_data),
+    transaction_request: TransactionRequest = Depends(valid_transaction),
+) -> TransactionRequest:
+    return transaction_request
